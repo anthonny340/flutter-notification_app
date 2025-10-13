@@ -12,7 +12,6 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   NotificationsBloc() : super(NotificationsState()) {
     on<NotificationStatusChanged>(_notificationStatusChanged);
-
     _initialStatusCheck();
   }
 
@@ -28,12 +27,21 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     Emitter<NotificationsState> emit,
   ) {
     emit(state.copyWith(status: event.status));
+    _getFCMToken();
   }
 
   //Metodo para inicializar todos los permisos dados previamente se lo llama en el constructor
   void _initialStatusCheck() async {
     final settings = await messaging.getNotificationSettings();
     add(NotificationStatusChanged(settings.authorizationStatus));
+  }
+
+  void _getFCMToken() async {
+    final settings = await messaging.getNotificationSettings();
+    if (settings.authorizationStatus != AuthorizationStatus.authorized) return;
+
+    final String? token = await messaging.getToken();
+    print(token);
   }
 
   void requestPermission() async {
