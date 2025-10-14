@@ -36,6 +36,7 @@ class _DetailsView extends StatelessWidget {
           if (message.imageUrl != null) Image.network(message.imageUrl!),
           const SizedBox(height: 30),
           Text(message.title, style: textStyle.titleMedium),
+          Text(message.body),
           const Divider(),
           Text(message.data.toString()),
         ],
