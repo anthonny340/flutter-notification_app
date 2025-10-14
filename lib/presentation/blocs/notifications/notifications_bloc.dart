@@ -1,17 +1,33 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
+
+import 'package:notification_app/domain/entities/push_message.dart';
 import 'package:notification_app/firebase_options.dart';
 
 part 'notifications_event.dart';
 part 'notifications_state.dart';
 
+//Para recibir notificacion cuando la app este terminada
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp();
+
+  print("Handling a background message: ${message.messageId}");
+}
+
 class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  NotificationsBloc() : super(NotificationsState()) {
+  NotificationsBloc() : super(const NotificationsState()) {
     on<NotificationStatusChanged>(_notificationStatusChanged);
+    on<NotificationReceived>(_onPushMessageNotificationReceived);
+    //TODO 3: Crear el listener # _onPushMessageReceived
 
     //Verificar el estado de las notificaciones
     _initialStatusCheck();
@@ -24,6 +40,17 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   static Future<void> initilizedFCM() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  void _onPushMessageNotificationReceived(
+    NotificationReceived event,
+    Emitter<NotificationsState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        notifications: [event.pushMessage, ...state.notifications],
+      ),
     );
   }
 
@@ -50,12 +77,23 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   }
 
   void _handleRemoteMassage(RemoteMessage message) {
-    print('Got a message whilst in the foreground!');
-    print('Message data: ${message.data}');
+    // print('Got a message whilst in the foreground!');
+    // print('Message data: ${message.data}');
 
+    final notification = PushMessage(
+      messageId:
+          message.messageId?.replaceAll(':', '').replaceAll('%', '') ?? '',
+      title: message.notification!.title ?? '',
+      body: message.notification!.body ?? '',
+      sentDate: message.sentTime ?? DateTime.now(),
+      data: message.data,
+      imageUrl: Platform.isAndroid
+          ? message.notification!.android?.imageUrl
+          : message.notification!.apple?.imageUrl,
+    );
     if (message.notification == null) return;
 
-    print('Message also contained a notificaction: ${message.notification}');
+    add(NotificationReceived(pushMessage: notification));
   }
 
   void _onForegroundMessage() {
