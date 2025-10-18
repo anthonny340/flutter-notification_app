@@ -25,10 +25,12 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  int pushNumberId = 0;
+
   NotificationsBloc() : super(const NotificationsState()) {
     on<NotificationStatusChanged>(_notificationStatusChanged);
     on<NotificationReceived>(_onPushMessageNotificationReceived);
-    //TODO 3: Crear el listener # _onPushMessageReceived
 
     //Verificar el estado de las notificaciones
     _initialStatusCheck();
@@ -78,6 +80,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   }
 
   void handleRemoteMassage(RemoteMessage message) {
+    if (message.notification == null) return;
     // print('Got a message whilst in the foreground!');
     // print('Message data: ${message.data}');
 
@@ -92,8 +95,13 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
           ? message.notification!.android?.imageUrl
           : message.notification!.apple?.imageUrl,
     );
-    if (message.notification == null) return;
 
+    LocalNotifications.showLocalNotification(
+      id: ++pushNumberId, //Se puede mejorar la logica del id
+      body: notification.body,
+      title: notification.title,
+      data: notification.data.toString(),
+    );
     add(NotificationReceived(pushMessage: notification));
   }
 

@@ -19,10 +19,46 @@ class LocalNotifications {
     );
     // TODO ios configuration
 
-    // await flutterLocalNotificationsPlugin.initialize(
+    const initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      //TODO: ios configuration settings
+    );
 
-    //   //TODO
-    //   // onDidReceiveBackgroundNotificationResponse: (details) {},
-    // );
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      //TODO
+      // onDidReceiveBackgroundNotificationResponse: (details) {},
+    );
+  }
+
+  static void showLocalNotification({
+    required int id,
+    String? title,
+    String? body,
+    String? data,
+  }) {
+    const androidDetails = AndroidNotificationDetails(
+      'channelId',
+      'channelName',
+      playSound: true,
+      sound: RawResourceAndroidNotificationSound('notification'),
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const notificationDetails = NotificationDetails(
+      android: androidDetails,
+      //TODO: ios
+    );
+
+    final flutterLocalNotifiactionsPlugin = FlutterLocalNotificationsPlugin();
+
+    flutterLocalNotifiactionsPlugin.show(
+      id,
+      title,
+      body,
+      notificationDetails,
+      payload: data,
+    );
   }
 }
