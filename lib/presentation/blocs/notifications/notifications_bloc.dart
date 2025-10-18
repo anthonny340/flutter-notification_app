@@ -9,6 +9,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:notification_app/domain/entities/push_message.dart';
 import 'package:notification_app/firebase_options.dart';
+import 'package:notification_app/local_notification/local_notifications.dart';
 
 part 'notifications_event.dart';
 part 'notifications_state.dart';
@@ -110,6 +111,8 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       provisional: false,
       sound: true,
     );
+
+    await requestPermissionLocalNotification();
 
     add(NotificationStatusChanged(settings.authorizationStatus));
     // settings.authorizationStatus;
