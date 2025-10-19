@@ -73,7 +73,10 @@ class _HandleNotificationInteractionsState
   }
 
   void _handleMessage(RemoteMessage message) {
-    context.read<NotificationsBloc>().handleRemoteMassage(message);
+    context.read<NotificationsBloc>().handleRemoteMassage(
+      message,
+      showLocal: false,
+    );
 
     final messageId = message.messageId
         ?.replaceAll(':', '')

@@ -90,7 +90,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     print(token);
   }
 
-  void handleRemoteMassage(RemoteMessage message) {
+  void handleRemoteMassage(RemoteMessage message, {bool showLocal = true}) {
     if (message.notification == null) return;
     // print('Got a message whilst in the foreground!');
     // print('Message data: ${message.data}');
@@ -107,7 +107,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
           : message.notification!.apple?.imageUrl,
     );
 
-    if (showLocalNotification != null) {
+    if (showLocalNotification != null && showLocal) {
       showLocalNotification!(
         id: ++pushNumberId, //Se puede mejorar la logica del id
         body: notification.body,
@@ -121,7 +121,9 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   }
 
   void _onForegroundMessage() {
-    FirebaseMessaging.onMessage.listen(handleRemoteMassage);
+    FirebaseMessaging.onMessage.listen(
+      (message) => handleRemoteMassage(message, showLocal: true),
+    );
   }
 
   void requestPermission() async {
