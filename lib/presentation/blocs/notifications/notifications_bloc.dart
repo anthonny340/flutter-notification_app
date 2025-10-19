@@ -8,7 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:notification_app/domain/entities/push_message.dart';
 import 'package:notification_app/firebase_options.dart';
-import 'package:notification_app/local_notification/local_notifications.dart';
+// import 'package:notification_app/local_notification/local_notifications.dart';
 
 part 'notifications_event.dart';
 part 'notifications_state.dart';
@@ -112,7 +112,8 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
         id: ++pushNumberId, //Se puede mejorar la logica del id
         body: notification.body,
         title: notification.title,
-        data: notification.data.toString(),
+        data: notification
+            .messageId, //Mandamos el messageId para poder hacer la navegacion del mensaje a una nueva pantalla
       );
     }
 
